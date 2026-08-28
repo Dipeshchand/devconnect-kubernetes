@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: storage-test-pod
+
+spec:
+  containers:
+    - name: storage-test
+      image: nginx:latest
+
+      volumeMounts:
+        - name: backend-storage
+          mountPath: /data
+
+  volumes:
+    - name: backend-storage
+    
+      persistentVolumeClaim:
+        claimName: devconnect-backend-pvc

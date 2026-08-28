@@ -1,0 +1,113 @@
+# apiVersion: apps/v1
+# # "I am using the apps/v1 version of the Kubernetes Deployment API."
+# kind: Deployment
+# # This is very important.
+
+# # It tells Kubernetes what you are creating.
+
+# # kind: Deployment
+# #         ↓
+# # "I want Kubernetes to create/manage a Deployment"
+# # A Deployment's job is to manage your application Pods.
+# # think -Deployment
+# #     ↓
+# # creates/manages Pods
+# #     ↓
+# # your backend application runs inside Pods
+
+# metadata:
+#   name: devconnect-backend
+
+# # This gives your Deployment a name.
+
+# # So Kubernetes will know this Deployment as: devconnect-backend
+
+# spec:
+# spec means:
+# # "Here is how I want this Deployment to behave."
+# # Everything under spec describes what you want Kubernetes to create and maintain.
+
+#   replicas: 2
+# # It means:
+# # I want 2 copies of my backend running.
+
+# # For example:
+
+# #              Deployment
+# #                   |
+# #           ----------------
+# #           |              |
+# #         Pod 1           Pod 2
+# #        Backend          Backend
+#   selector:
+#     matchLabels:
+#       app: devconnect-backend
+
+#   template:
+#     metadata:
+#       labels:
+#         app: devconnect-backend
+
+#     spec:
+#       containers:
+#         - name: backend
+#           image: devconnect-backend:latest
+
+#           ports:
+#             - containerPort: 5000
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: devconnect-backend
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: devconnect-backend
+
+  template:
+    metadata:
+      labels:
+        app: devconnect-backend
+
+    spec:
+      containers:
+        - name: backend
+          image: devconnect-backend:latest
+
+          envFrom:
+            - configMapRef:
+                name: devconnect-backend-config
+
+            - secretRef:
+                name: devconnect-backend-secret
+
+          ports:
+            - containerPort: 5000
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+             path: /
+             port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10     
+
+          resources:
+            requests:
+             cpu: "100m"
+             memory: "128Mi"
+
+            limits:
+             cpu: "500m"
+             memory: "512Mi"
